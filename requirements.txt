@@ -1,0 +1,11 @@
+streamlit
+numpy
+joblib
+scikit-learn
+pandas
+fastapi
+uvicorn
+groq
+xgboost
+pydantic
+python-dotenv
