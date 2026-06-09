@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     software-properties-common \
     git \
+    libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .

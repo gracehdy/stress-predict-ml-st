@@ -4,7 +4,7 @@
 
 **Task:** Classification
 
-**Framework:** Pandas, SKLearn, XGBoost, Streamlit
+**Framework:** Pandas, SKLearn, LightGBM, Streamlit, Hugging Face
 
 ---
 
@@ -84,7 +84,7 @@ Additionally, we note following key correlations with the target variable:
 The data contains 1,000,000 records, with a total of 20 features:
 - **Demographic**: Age, Sex, Academic Year
 - **Academic**: Hours studying per day, academic test pressure (Likert), academic performance (GPA)
-- **Mental Health**: Mental health index, anxiety score, depression score, burnout score (Likert)
+- **Mental Health**: Anxiety score, depression score, burnout score (Likert)
 - **Lifestyle**: Sleep duration, physical activity duration, daily screentime, daily internet use (hours)
 - **Social/Economic**: Social support, financial stress, family expectations
 - **Output**: Stress Category (High, Medium, Low)
@@ -110,18 +110,22 @@ docker build -t stress-predict . && docker run -p 8501:8501 stress-predict
 
 ## Model
 
-The XGBoost model we chose has the following parameters:
+The LightGBM model we chose has the following parameters:
 
 | Params | Values |
 |--------|--------|
-| `learning_rate` | 0.1 |
-| `max_depth` | 6 |
-| `n_estimators` | 100 |
-| `eval_metric` | `mlogloss` |
+| `verbosity` | -1 |
+| `random_state` | 42 |
+| `n_jobs` | -1 |
+| `class_weight` | `balanced` |
+| `max_depth` | 10 |
+| ` learning_ratet` | 0.05 |
+| `n_estimators` | 500 |
 
-XGBoost was selected for its sequential residual-based learning, which handles non-linear relationships in structured data more explicitly than Random Forest's parallel ensemble approach. SVM was eliminated early due to subsampling constraints (100K of 800K rows). LightGBM and XGBoost performed comparably (Δ accuracy < 0.1%); no strong metric-based justification distinguishes the two given the data leakage present in this dataset.
 
-**Pretrained weights:** We store the resulting model in the file `model_stress.pkl` (see below)
+LightGBM was selected for its superior efficiency and ability to handle large, complex datasets, offering distinct advantages over Random Forest, SVM, and XGBoost. SVM was eliminated early due to subsampling constraints (100K of 800K rows). Random Forest, which builds trees independently and often consumes excessive memory, LightGBM utilizes a gradient-boosting approach that iteratively corrects errors, resulting in higher predictive accuracy for non-linear relationships.LightGBM and XGBoost performed comparably (Δ accuracy < 0.1%); however LightGBM was prioritized since it provided the most stable and robust decision boundaries for distinguishing nuanced "Moderate" stress levels in a resource-constrained deployment environment.
+
+**Pretrained weights:** We store the resulting model in the file `model_stress3.pkl` (see below)
 
 ---
 
@@ -139,9 +143,9 @@ XGBoost was selected for its sequential residual-based learning, which handles n
 ├── api.py                # FastAPI app
 ├── app.py                # Streamlit entry point
 ├── Dockerfile 
-├── model_stress.pkl      # Serialised, trained model
+├── model_stress3.pkl      # Serialised, trained model
 ├── requirements.txt
-└── scaler.pkl            # Serialised, fitted scaler instance
+└── scaler2.pkl            # Serialised, fitted scaler instance
 
 ```
 
