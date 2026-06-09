@@ -18,11 +18,18 @@ def load_ml():
 
 model, scaler = load_ml()
 
-
 def get_ai_recommendation(status, faktor_dominan):
     try:
         client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
-        prompt = f"Berikan 3 saran psikologis singkat dan suportif untuk mahasiswa dengan status stres: '{status}', dipicu oleh: {', '.join(faktor_dominan)}. Format poin-poin."
+        # Mengubah prompt agar AI memberikan format yang Anda mau
+        prompt = f"""Berikan 3 saran psikologis untuk mahasiswa dengan status stres: '{status}', dipicu oleh: {', '.join(faktor_dominan)}. 
+        Aturan wajib: 
+        1. Hanya berikan 3 poin.
+        2. Tiap poin harus 1 kalimat saja.
+        3. Tanpa angka (gunakan simbol bullet • saja).
+        4. Tanpa kata pembuka.
+        5. Tanpa format tebal (bold)."""
+        
         chat = client.chat.completions.create(
             messages=[{"role": "user", "content": prompt}],
             model="llama-3.1-8b-instant",
@@ -30,7 +37,7 @@ def get_ai_recommendation(status, faktor_dominan):
         )
         return chat.choices[0].message.content
     except:
-        return "• Atur jadwal tidur 7-8 jam/hari.\n• Gunakan teknik Pomodoro.\n• Konsultasi ke konselor kampus."
+        return "• Terapkan teknik pernapasan dalam untuk menenangkan sistem saraf.\n• Lakukan aktivitas fisik ringan untuk meningkatkan suasana hati.\n• Ganti pikiran negatif dengan kalimat positif untuk mengurangi kecemasan."
 
 st.markdown("""
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
@@ -234,7 +241,6 @@ if "input_data" not in st.session_state:
     st.stop()
 
 d = st.session_state.input_data
-URL_PREDICT = "https://gracehdyc-stress-predict-api-2.hf.space/predict"
 gender_encoded = 1 if d.get('gender') in ["Laki-laki", "Male"] else 0
 th_input = str(d.get('tahun_akademik', 'Tahun 1'))
 academic_year = 2 if '2' in th_input else (3 if '3' in th_input else (4 if '4' in th_input else 1))
