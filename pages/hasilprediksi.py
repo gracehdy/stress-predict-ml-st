@@ -219,6 +219,16 @@ def render_navbar():
 
 render_navbar()
 
+NAMA_FITUR = [
+    'Faktor Umur', 'Faktor Gender', 'Tahun Angkatan Kuliah', 'Durasi Waktu Belajar Harian', 
+    'Beban Tekanan Ujian', 'Performa Akademik / IPK', 'Tingkat Kecemasan (Anxiety)', 
+    'Kondisi Suasana Hati (Mood/Depresi)', 'Kualitas & Durasi Istirahat/Tidur', 
+    'Rendahnya Aktivitas Fisik/Olahraga', 'Keterbatasan Dukungan Sosial', 
+    'Durasi Paparan Layar Gadget (Screen Time)', 'Pola Konsumsi Internet Harian', 
+    'Tekanan Finansial/Keuangan Mahasiswa', 'Tuntutan/Ekspektasi dari Keluarga', 
+    'Tingkat Kejenuhan Akademik (Burnout)'
+]
+
 if "input_data" not in st.session_state:
     st.warning(" Silakan isi kuesioner terlebih dahulu di halaman Prediksi.")
     st.stop()
@@ -236,7 +246,7 @@ raw_features = np.array([[
     d['social_support'], d['screen_time'], d['internet_usage'],
     d['financial_stress'], d['ekspektasi_keluarga'], d['burnout_score']
 ]], dtype=np.float32)
-start_time = time.time()
+
 
 
 scaled_features = scaler.transform(raw_features)
@@ -245,10 +255,27 @@ status_list = ["Stres Rendah (Low)", "Stres Sedang (Moderate)", "Stres Tinggi (H
 status_terprediksi = status_list[pred_idx]
 status_class = "status-high" if pred_idx == 2 else ("status-mid" if pred_idx == 1 else "status-low")
 
+score_display = 7.0 
+if hasattr(model, "predict_proba"):
+    score_display = float(round(model.predict_proba(scaled_features)[0][pred_idx] * 10, 1))
+    
+importances = model.feature_importances_ if hasattr(model, "feature_importances_") else [1]*16
+kontribusi = np.abs(scaled_features[0]) * importances
+idx_teratas = np.argsort(kontribusi)[::-1][:2]
+faktor_dominan = [NAMA_FITUR[i] for i in idx_teratas]
+
+with st.spinner("AI sedang merumuskan saran..."):
+    rekomendasi_teks = get_ai_recommendation(status_terprediksi, faktor_dominan)
+
+html_rekomendasi = ""
+for line in rekomendasi_teks.split('\n'):
+    if line.strip():
+        html_rekomendasi += f'<div class="recommendation-item">• {line.replace("•", "").strip()}</div>'
+
 st.markdown(f"""
 <div class="hasil-container-custom">
 <div class="main-title">Hasil Analisis Tingkat Stres</div>
-<div class="subtitle">Berikut adalah kalkulasi prediksi tingkat stres Anda beserta rekomendasi solusinya.</div>
+<div class="subtitle">Berikut adalah kalkulasi prediksi tingkat stres Anda beserta rekomendasi solusinya.</div>  
 <div class="vue-inner-title">Status Deteksi Sistem:</div>
 <div class="status-banner {status_class}">
 {status_terprediksi} &nbsp;|&nbsp; Skor Keyakinan Model: {score_display}/10
@@ -256,17 +283,13 @@ st.markdown(f"""
 <div class="result-section-title">Faktor Pemicu Terbesar</div>
 <div class="factor-box">{', '.join(faktor_dominan)}</div>
 <div class="result-section-title">Rekomendasi Tindakan Konselor AI</div>
+<div style="padding-top: 10px;">
 {html_rekomendasi}
+</div>
 <br><hr style='border-color: #F3F4F6;'><br>
 </div>
 """, unsafe_allow_html=True)
 
-st.caption(f"Latensi: {latency_ms:.2f} ms")
-
-with st.spinner("AI sedang merumuskan saran..."):
-    rekomendasi = get_ai_recommendation(status_terprediksi, ["Beban Akademik"])
-    st.markdown(" Rekomendasi Konselor AI")
-    st.write(rekomendasi)
 
 if st.button("Isi Ulang Kuesioner"):
     del st.session_state.input_data
