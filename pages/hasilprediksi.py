@@ -1,13 +1,36 @@
 import streamlit as st
-import requests
-import time
-
+import joblib
+import pandas as pd
+import numpy as np
+from groq import Groq
+import os
 
 st.set_page_config(
     page_title="StressPredict - Hasil Analisis", 
     layout="centered"
 )
 
+@st.cache_resource
+def load_ml():
+    model = joblib.load("model_stress3.pkl")
+    scaler = joblib.load("scaler2.pkl")
+    return model, scaler
+
+model, scaler = load_ml()
+
+
+def get_ai_recommendation(status, faktor_dominan):
+    try:
+        client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+        prompt = f"Berikan 3 saran psikologis singkat dan suportif untuk mahasiswa dengan status stres: '{status}', dipicu oleh: {', '.join(faktor_dominan)}. Format poin-poin."
+        chat = client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt}],
+            model="llama-3.1-8b-instant",
+            temperature=0.6
+        )
+        return chat.choices[0].message.content
+    except:
+        return "• Atur jadwal tidur 7-8 jam/hari.\n• Gunakan teknik Pomodoro.\n• Konsultasi ke konselor kampus."
 
 st.markdown("""
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
@@ -202,47 +225,27 @@ if "input_data" not in st.session_state:
 
 d = st.session_state.input_data
 URL_PREDICT = "https://gracehdyc-stress-predict-api-2.hf.space/predict"
-URL_RECOMMEND = "https://gracehdyc-stress-predict-api-2.hf.space/recommend"
+gender_encoded = 1 if d.get('gender') in ["Laki-laki", "Male"] else 0
+th_input = str(d.get('tahun_akademik', 'Tahun 1'))
+academic_year = 2 if '2' in th_input else (3 if '3' in th_input else (4 if '4' in th_input else 1))
+
+raw_features = np.array([[
+    d['umur'], gender_encoded, academic_year, d['jam_belajar'], 
+    d['tekanan_ujian'], d['ipk'] * 25.0, d['anxiety_score'], 
+    d['depression_score'], d['jam_tidur'], d['aktivitas_fisik'], 
+    d['social_support'], d['screen_time'], d['internet_usage'],
+    d['financial_stress'], d['ekspektasi_keluarga'], d['burnout_score']
+]], dtype=np.float32)
 start_time = time.time()
 
-try:
-    response = requests.post(URL_PREDICT, json=d, timeout=10)
-    latency_ms = (time.time() - start_time) * 1000
-    if response.status_code == 200:
-        hasil_api = response.json()
-        status_terprediksi = hasil_api.get("status", "Stres Sedang (Moderate)")
-        score_display = hasil_api.get("confidence_score", 7.0)
-        faktor_dominan = hasil_api.get("faktor_dominan", ["Beban Tekanan Ujian"])
-        rekomendasi_ai = hasil_api.get("rekomendasi_ai", [])
 
-        if "Tinggi" in status_terprediksi:
-            status_class = "status-high"
-        elif "Sedang" in status_terprediksi:
-            status_class = "status-mid"
-        else:
-            status_class = "status-low"
-       
-        with st.spinner("Meminta saran konselor AI..."):
-            data_ai = {
-                "status_stres": status_terprediksi,
-                "faktor_dominan": faktor_dominan
-            }
-            try:
-                response_ai = requests.post(URL_RECOMMEND, json=data_ai, timeout=15)
-                if response_ai.status_code == 200:
-                    rekomendasi_ai = response_ai.json().get("rekomendasi_ai", "Tidak ada rekomendasi.")
-                else:
-                    rekomendasi_ai = "Atur jadwal tidur malam minimal 7 jam untuk pemulihan energi otak. Gunakan teknik Pomodoro (50 menit belajar, 10 menit istirahat). Diskusikan beban akademik dengan dosen pembimbing atau konselor kampus."
-            except requests.exceptions.RequestException:
-                rekomendasi_ai = "Koneksi ke server AI terputus."
-                
-                
-        rekomendasi_list = response_ai.json().get("rekomendasi_ai", [])
-        html_rekomendasi = ""
-        for item in rekomendasi_list:
-            html_rekomendasi += f'<div class="recommendation-item">• {item}</div>'
+scaled_features = scaler.transform(raw_features)
+pred_idx = int(model.predict(scaled_features)[0])
+status_list = ["Stres Rendah (Low)", "Stres Sedang (Moderate)", "Stres Tinggi (High)"]
+status_terprediksi = status_list[pred_idx]
+status_class = "status-high" if pred_idx == 2 else ("status-mid" if pred_idx == 1 else "status-low")
 
-        st.markdown(f"""
+st.markdown(f"""
 <div class="hasil-container-custom">
 <div class="main-title">Hasil Analisis Tingkat Stres</div>
 <div class="subtitle">Berikut adalah kalkulasi prediksi tingkat stres Anda beserta rekomendasi solusinya.</div>
@@ -258,19 +261,17 @@ try:
 </div>
 """, unsafe_allow_html=True)
 
-        st.caption(f"Latensi: {latency_ms:.2f} ms")
+st.caption(f"Latensi: {latency_ms:.2f} ms")
 
-    else:
-        st.error(f"Gagal mengambil data dari server API. Kode Error: {response.status_code}")
-        st.write("Respons Server:", response.text)
+with st.spinner("AI sedang merumuskan saran..."):
+    rekomendasi = get_ai_recommendation(status_terprediksi, ["Beban Akademik"])
+    st.markdown(" Rekomendasi Konselor AI")
+    st.write(rekomendasi)
 
-except requests.exceptions.ConnectionError:
-    st.error("Gagal terhubung ke API Server. Pastikan Backend (FastAPI) sudah berjalan di terminal terpisah menggunakan perintah 'uvicorn api:app --reload'")
+if st.button("Isi Ulang Kuesioner"):
+    del st.session_state.input_data
+    st.switch_page("pages/prediksi.py")
 
-
-if st.button("Isi Ulang Kuesioner", key="btn_reload_form", use_container_width=True):
-        del st.session_state.input_data
-        st.switch_page("pages/prediksi.py")
 
 st.markdown("<br>", unsafe_allow_html=True)
 
