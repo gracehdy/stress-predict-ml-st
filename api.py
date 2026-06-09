@@ -45,7 +45,7 @@ class RecommendInput(BaseModel):
     status_stres: str
     faktor_dominan: list[str]
 
-@app.post("/predict")
+@app.post("api/predict")
 def predict_stress(data: KuesionerInput):
     gender_encoded = 1 if data.gender == "Laki-laki" else 0
     
@@ -91,7 +91,7 @@ def predict_stress(data: KuesionerInput):
         "faktor_dominan": faktor_dominan
     }
     
-@app.post("/recommend")
+@app.post("api/recommend")
 def get_recommendation(data: RecommendInput):
     faktor_teks = ", ".join(data.faktor_dominan)
     prompt = f"Saya seorang mahasiswa dengan tingkat stres '{data.status_stres}', dan faktor pemicu utamanya adalah: {faktor_teks}. Berikan 3 saran singkat, praktis, dan suportif dalam bentuk poin-poin (bullet points) untuk mengatasi hal ini."
