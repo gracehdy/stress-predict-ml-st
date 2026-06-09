@@ -181,8 +181,13 @@ def render_navbar():
 
 
 
+<<<<<<< HEAD
 MODEL_PATH = "model_stress.pkl"
 SCALER_PATH = "scaler.pkl"  
+=======
+MODEL_PATH = "model_stress2.pkl"
+SCALER_PATH = "scaler2.pkl"  
+>>>>>>> fresh-main
 
 @st.cache_resource
 def load_ml_components():
