@@ -9,8 +9,8 @@ from dotenv import load_dotenv
 load_dotenv()
 app = FastAPI(title="StressPredict API")
 
-model = joblib.load("model_stress.pkl")
-scaler = joblib.load("scaler.pkl")
+model = joblib.load("model_stress2.pkl")
+scaler = joblib.load("scaler2.pkl")
 groq_client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
 NAMA_FITUR = [
