@@ -201,8 +201,8 @@ if "input_data" not in st.session_state:
     st.stop()
 
 d = st.session_state.input_data
-URL_PREDICT = "https://gracehdyc-stress-predict-api-2.hf.space/api/predict"
-URL_RECOMMEND = "https://gracehdyc-stress-predict-api-2.hf.space/api/recommend"
+URL_PREDICT = "https://gracehdyc-stress-predict-api-2.hf.space/predict"
+URL_RECOMMEND = "https://gracehdyc-stress-predict-api-2.hf.space/recommend"
 start_time = time.time()
 
 try:
