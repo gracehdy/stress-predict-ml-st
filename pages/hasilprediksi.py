@@ -250,7 +250,7 @@ try:
 <div class="status-banner {status_class}">
 {status_terprediksi} &nbsp;|&nbsp; Skor Keyakinan Model: {score_display}/10
 </div>
-<div class="result-section-title">Faktor Pemicu Terbesar (XGBoost Analysis)</div>
+<div class="result-section-title">Faktor Pemicu Terbesar</div>
 <div class="factor-box">{', '.join(faktor_dominan)}</div>
 <div class="result-section-title">Rekomendasi Tindakan Konselor AI</div>
 {html_rekomendasi}

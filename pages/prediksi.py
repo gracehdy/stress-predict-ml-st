@@ -181,13 +181,8 @@ def render_navbar():
 
 
 
-<<<<<<< HEAD
-MODEL_PATH = "model_stress.pkl"
-SCALER_PATH = "scaler.pkl"  
-=======
-MODEL_PATH = "model_stress2.pkl"
+MODEL_PATH = "model_stress3.pkl"
 SCALER_PATH = "scaler2.pkl"  
->>>>>>> fresh-main
 
 @st.cache_resource
 def load_ml_components():
@@ -254,7 +249,6 @@ with st.form("kuesioner_form"):
         financial_stress = st.number_input("Stres Keuangan (1: Tidak Tertekan, 10: Sangat Tertekan)", min_value=1, max_value=10, value=None, placeholder=None)
     with col9:
         burnout_score = st.number_input("Skor Kejenuhan / Burnout (1: Tidak Kejenuhan, 10: Sangat Kejenuhan)", min_value=1, max_value=10, value=None, placeholder=None)
-        mental_health_index = st.number_input("Indeks Kesehatan Mental (1: Sangat Buruk, 10: Sangat Baik)", min_value=1, max_value=10, value=None, placeholder=None)
 
     st.markdown("<br>", unsafe_allow_html=True)
     submit_btn = st.form_submit_button("Analyze My Stress Level")
@@ -266,8 +260,7 @@ if submit_btn:
         depression_score is None or jam_tidur is None or 
         aktivitas_fisik is None or screen_time is None or 
         internet_usage is None or social_support is None or 
-        financial_stress is None or burnout_score is None or 
-        mental_health_index is None):
+        financial_stress is None or burnout_score is None):
         
         st.error("Mohon lengkapi seluruh data kuesioner Anda sebelum melakukan analisis!")
         st.stop()
@@ -279,7 +272,6 @@ if submit_btn:
         "depression_score": depression_score, "jam_tidur": jam_tidur,
         "aktivitas_fisik": aktivitas_fisik, "screen_time": screen_time,
         "internet_usage": internet_usage, "social_support": social_support,
-        "financial_stress": financial_stress, "burnout_score": burnout_score,
-        "mental_health_index": mental_health_index
+        "financial_stress": financial_stress, "burnout_score": burnout_score
     }
     st.switch_page("pages/hasilprediksi.py")

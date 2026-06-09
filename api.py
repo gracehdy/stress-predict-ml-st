@@ -20,7 +20,7 @@ NAMA_FITUR = [
     'Rendahnya Aktivitas Fisik/Olahraga', 'Keterbatasan Dukungan Sosial', 
     'Durasi Paparan Layar Gadget (Screen Time)', 'Pola Konsumsi Internet Harian', 
     'Tekanan Finansial/Keuangan Mahasiswa', 'Tuntutan/Ekspektasi dari Keluarga', 
-    'Tingkat Kejenuhan Akademik (Burnout)', 'Kondisi Kesehatan Mental Secara Umum'  
+    'Tingkat Kejenuhan Akademik (Burnout)'
 ]
 
 class KuesionerInput(BaseModel):
@@ -40,7 +40,6 @@ class KuesionerInput(BaseModel):
     social_support: int
     financial_stress: int
     burnout_score: int
-    mental_health_index: int
     
 class RecommendInput(BaseModel):
     status_stres: str
@@ -61,8 +60,7 @@ def predict_stress(data: KuesionerInput):
         data.tekanan_ujian, academic_performance_scaled, data.anxiety_score, 
         data.depression_score, data.jam_tidur, data.aktivitas_fisik, 
         data.social_support, data.screen_time, data.internet_usage,
-        data.financial_stress, data.ekspektasi_keluarga, data.burnout_score, 
-        data.mental_health_index
+        data.financial_stress, data.ekspektasi_keluarga, data.burnout_score
     ]], dtype=np.float32)
 
     scaled_features = scaler.transform(raw_features)
