@@ -1,0 +1,8 @@
+.streamlit-ml2/secrets.toml
+.env
+__pycache__/**/*
+data/raw/
+data/processed/
+data/raw/student_mental_health_burnout_1M.csv
+*.npy
+*.pkl
