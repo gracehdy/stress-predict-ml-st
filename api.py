@@ -1,17 +1,33 @@
-import os
-from fastapi import FastAPI
-from pydantic import BaseModel
-import joblib
-import numpy as np
+from fastapi import FastAPI, Request, BackgroundTasks
+from fastapi.middleware.cors import CORSMiddleware
 from groq import Groq
-from dotenv import load_dotenv
+import numpy as np
+import joblib
+import os
+import json
+import uuid
+import pandas as pd
 
-load_dotenv()
-app = FastAPI(title="StressPredict API")
+app = FastAPI(title="Stress Predict API")
 
-model = joblib.load("model_stress3.pkl")
-scaler = joblib.load("scaler2.pkl")
-groq_client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+MODEL_PATH = "model_stress3.pkl"
+SCALER_PATH = "scaler2.pkl"  
+
+model = joblib.load(MODEL_PATH) if os.path.exists(MODEL_PATH) else None
+scaler = joblib.load(SCALER_PATH) if os.path.exists(SCALER_PATH) else None
+
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
+groq_client = Groq(api_key=GROQ_API_KEY)
+
+rekomendasi_cache = {}
 
 NAMA_FITUR = [
     'Faktor Umur', 'Faktor Gender', 'Tahun Angkatan Kuliah', 'Durasi Waktu Belajar Harian', 
@@ -23,88 +39,90 @@ NAMA_FITUR = [
     'Tingkat Kejenuhan Akademik (Burnout)'
 ]
 
-class KuesionerInput(BaseModel):
-    umur: int
-    gender: str
-    tahun_akademik: str
-    jam_belajar: int
-    ipk: float
-    tekanan_ujian: int
-    ekspektasi_keluarga: int
-    anxiety_score: int
-    depression_score: int
-    jam_tidur: int
-    aktivitas_fisik: int
-    screen_time: int
-    internet_usage: int
-    social_support: int
-    financial_stress: int
-    burnout_score: int
-    
-class RecommendInput(BaseModel):
-    status_stres: str
-    faktor_dominan: list[str]
+def proses_groq_di_latar_belakang(session_id: str, status_stres, umur, jam_tidur, tekanan_ujian):
+    try:
+        completion = groq_client.chat.completions.create(
+            model="llama-3.1-8b-instant", 
+            messages=[{"role": "user", "content": f"Berikan 3 rekomendasi psikologis singkat untuk mahasiswa {umur} thn, status stres: {status_stres}, tidur: {jam_tidur} jam, tekanan ujian: {tekanan_ujian}/10. Format JSON murni: {{\"rekomendasi\": [\"R1\", \"R2\", \"R3\"]}}"}],
+            temperature=0.6,
+            response_format={"type": "json_object"} 
+        )
+        data_json = json.loads(completion.choices[0].message.content.strip())
+        rekomendasi_cache[session_id] = data_json.get("rekomendasi", [])
+    except Exception as e:
+        rekomendasi_cache[session_id] = [
+            "Atur jadwal tidur malam minimal 7 jam untuk memulihkan energi otak.",
+            "Sempatkan istirahat 5-10 menit setiap 50 menit belajar (Teknik Pomodoro).",
+            "Diskusikan beban akademik dengan dosen pembimbing atau konselor kampus."
+        ]
 
-@app.post("/predict")
-def predict_stress(data: KuesionerInput):
-    gender_encoded = 1 if data.gender == "Laki-laki" else 0
+@app.post("/api/predict")
+async def api_predict(request: Request, background_tasks: BackgroundTasks):
+    data = await request.json()
+    print("Data diterima dari Frontend:", data)
     
-    academic_year_encoded = 1
-    if "2" in data.tahun_akademik: academic_year_encoded = 2
-    elif "3" in data.tahun_akademik: academic_year_encoded = 3
-    elif "4" in data.tahun_akademik: academic_year_encoded = 4
+    def safe_int(val, default=0): return int(val) if str(val).isdigit() else default
+    def safe_float(val, default=0.0):
+        try: return float(val)
+        except: return default
 
-    academic_performance_scaled = min(100.0, max(1.0, data.ipk * 25.0))
+    gender_encoded = 1 if data.get('gender') in ["Laki-laki", "Male"] else 0
+    th_input = str(data.get('tahunAkademik', 'Tahun 1'))
+    academic_year_encoded = 2 if '2' in th_input else (3 if '3' in th_input else (4 if '4' in th_input else 1))
+    academic_performance_scaled = min(100.0, max(1.0, safe_float(data.get('ipk'), 3.5) * 25.0))
+
     raw_features = np.array([[
-        data.umur, gender_encoded, academic_year_encoded, data.jam_belajar, 
-        data.tekanan_ujian, academic_performance_scaled, data.anxiety_score, 
-        data.depression_score, data.jam_tidur, data.aktivitas_fisik, 
-        data.social_support, data.screen_time, data.internet_usage,
-        data.financial_stress, data.ekspektasi_keluarga, data.burnout_score
+        safe_int(data.get('umur'), 21), gender_encoded, academic_year_encoded,                        
+        safe_float(data.get('jamBelajar'), 6.0), safe_int(data.get('tekananUjian'), 5),        
+        academic_performance_scaled, safe_int(data.get('anxietyScore'), 5),        
+        safe_int(data.get('depressionScore'), 5), safe_int(data.get('jamTidur'), 7),            
+        safe_int(data.get('aktivitasFisik'), 3), safe_int(data.get('socialSupport'), 7),       
+        safe_float(data.get('screenTime'), 4.0), safe_float(data.get('internetUsage'), 4.0),   
+        safe_int(data.get('financialStress'), 4), safe_int(data.get('ekspektasiKeluarga'), 5),  
+        safe_int(data.get('burnoutScore'), 5)   
     ]], dtype=np.float32)
 
-    scaled_features = scaler.transform(raw_features)
-    prediction = int(model.predict(scaled_features)[0])
-    categories = {0: "Stres Rendah (Low)", 1: "Stres Sedang (Moderate)", 2: "Stres Tinggi (High)"}
-    status_terprediksi = categories.get(prediction, "Stres Sedang (Moderate)")
+    status_terprediksi = "Stres Sedang (Moderate)"
     score_display = 7.0
-    if hasattr(model, "predict_proba"):
-        score_display = float(round(model.predict_proba(scaled_features)[0][prediction] * 10, 1))
+    faktor_dominan = ["Beban Tekanan Ujian"]
 
-    try:
-        importances = model.feature_importances_
-        z_scores = scaled_features[0].copy()
-        for idx in [8, 10, 16, 5]: 
-            z_scores[idx] = -z_scores[idx]
+    if model is not None and scaler is not None:
+        try:
+            scaled_features = scaler.transform(raw_features)
+            df_scaled = pd.DataFrame(scaled_features, columns=NAMA_FITUR)
+            prediction = model.predict(df_scaled)[0]
+            categories = {0: "Stres Rendah (Low)", 1: "Stres Sedang (Moderate)", 2: "Stres Tinggi (High)"}
+            status_terprediksi = categories.get(prediction, "Stres Sedang (Moderate)")
             
-        kontribusi_fitur = np.maximum(0, z_scores) * importances
-        indeks_teratas = np.argsort(kontribusi_fitur)[::-1][:3]
-        
-        faktor_dominan = [str(NAMA_FITUR[idx]) for idx in indeks_teratas if kontribusi_fitur[idx] > 0]
-        if not faktor_dominan:
-            faktor_dominan = ["Beban Tekanan Ujian"]
-    except AttributeError:
-        faktor_dominan = ["Beban Tekanan Ujian", "Tingkat Kecemasan (Anxiety)"]
+            if hasattr(model, "predict_proba"):
+                score_display = float(round(model.predict_proba(scaled_features)[0][prediction] * 10, 1))
+            
+            importances = model.feature_importances_
+            z_scores = scaled_features[0].copy()
+            for idx in [8, 10, 16, 5]: z_scores[idx] = -z_scores[idx]
+            kontribusi_fitur = np.maximum(0, z_scores) * importances
+            indeks_teratas = np.argsort(kontribusi_fitur)[::-1][:2]
+            faktor_dominan = [str(NAMA_FITUR[idx]) for idx in indeks_teratas if kontribusi_fitur[idx] > 0]
+        except Exception as e:
+            pass
+    import time
+    session_id = str(int(time.time() * 1000))
+    background_tasks.add_task(proses_groq_di_latar_belakang, session_id, status_terprediksi, raw_features[0][0], raw_features[0][8], raw_features[0][4])
+
     return {
         "status": status_terprediksi,
-        "confidence_score": score_display,
-        "faktor_dominan": faktor_dominan
+        "score": score_display,
+        "faktorDominan": faktor_dominan[:2],
+        "sessionId": session_id,
+        "rekomendasi": ["Memanggil AI untuk merumuskan saran terbaik..."]
     }
-    
-@app.post("/recommend")
-def get_recommendation(data: RecommendInput):
-    faktor_teks = ", ".join(data.faktor_dominan)
-    prompt = f"Saya seorang mahasiswa dengan tingkat stres '{data.status_stres}', dan faktor pemicu utamanya adalah: {faktor_teks}. Berikan 3 saran singkat, praktis, dan suportif dalam bentuk poin-poin (bullet points) untuk mengatasi hal ini."
-    
-    try:
-        chat_completion = groq_client.chat.completions.create(
-            messages=[{"role": "user", "content": prompt}],
-            model="llama-3.1-8b-instant",
-            temperature=0.7,
-            max_tokens=250
-        )
-        return {"rekomendasi_ai": chat_completion.choices[0].message.content}
-    except Exception as e:
-        return {"rekomendasi_ai": """Sistem AI sedang sibuk. Atur jadwal tidur malam minimal 7 jam. 
-Gunakan teknik Pomodoro. 
-Diskusikan beban akademik dengan konselor kampus."""}
+
+@app.get("/")
+def health_check():
+    return {"status": "FastAPI is running perfectly!"}
+@app.get("/api/recommendation/{session_id}")
+
+async def dapatkan_rekomendasi_async(session_id: str):  
+    if session_id in rekomendasi_cache:
+        return {"ready": True, "rekomendasi": rekomendasi_cache[session_id]}
+    return {"ready": False, "rekomendasi": ["Sedang menganalisis profil Anda..."]}
