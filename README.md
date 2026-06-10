@@ -14,11 +14,11 @@ During model development, we trained several other models for model selection. A
 
 | Model | Accuracy | F1-Macro | Time |
 |--------|-------|-----|------|
-| Logistic Regression |0.7559 ± 0.0017 | 0.7566 ± 0.0017 | 36.8s |
-| Random Forest | 0.7470 ± 0.0012 | 0.7491 ± 0.0012 | 1,317.8s |
-| SVM (with 100k subsample) | 0.7384 ± 0.0025 | 0.7256 ± 0.0032 | 6,744.5s |
-| LightGBM | 0.7560 ± 0.0013 | 0.7578 ± 0.0013 | 143.5s |
-| XGBoost (best) | 0.7559 ± 0.0015 | 0.7578 ± 0.0015| 242.4s |
+| Logistic Regression |0.7559 ± 0.0017 | 0.7566 ± 0.0017 | 11.9s |
+| Random Forest | 0.7470 ± 0.0012 | 0.7491 ± 0.0012 | ~224s |
+| SVM (with 100k subsample) | 0.7384 ± 0.0025 | 0.7256 ± 0.0032 | 4.0s |
+| LightGBM | 0.7560 ± 0.0013 | 0.7578 ± 0.0013 | ~347.3s |
+| XGBoost (best) | 0.7559 ± 0.0015 | 0.7578 ± 0.0015| 175.1s |
 
 The LightGBM model we chose has the following performance in the test set.
 
