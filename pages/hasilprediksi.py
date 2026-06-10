@@ -282,7 +282,7 @@ st.markdown(f"""
 <div class="hasil-container-custom">
 <div class="main-title">Hasil Analisis Tingkat Stres</div>
 <div class="subtitle">Berikut adalah kalkulasi prediksi tingkat stres Anda beserta rekomendasi solusinya.</div>  
-<div class="vue-inner-title">Status Deteksi Sistem:</div>
+<div class="vue-inner-title">Tingkat Stress:</div>
 <div class="status-banner {status_class}">
 {status_terprediksi} &nbsp;|&nbsp; Skor Keyakinan Model: {score_display}/10
 </div>
