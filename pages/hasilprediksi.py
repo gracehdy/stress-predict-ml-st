@@ -292,6 +292,9 @@ st.markdown(f"""
 <div style="padding-top: 10px;">
 {html_rekomendasi}
 </div>
+<div style="background-color: #FEE2E2; padding: 15px; border-radius: 10px; font-size: 0.85rem; color: #991B1B; border: 1px solid #FECACA;">
+<strong>Disclaimer:</strong> Hasil ini merupakan prediksi berbasis model kecerdasan buatan dan bukan merupakan diagnosis medis atau psikologis resmi. Hasil analisis ini tidak dapat menggantikan peran profesional kesehatan mental. Harap tetap berkonsultasi dengan psikolog atau psikiater jika Anda merasa mengalami tekanan yang serius.
+</div>
 <br><hr style='border-color: #F3F4F6;'><br>
 </div>
 """, unsafe_allow_html=True)
