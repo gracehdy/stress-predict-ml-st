@@ -16,3 +16,7 @@ model/scaler2.pkl
 testing_ml_flow/model_stress2.pkl
 testing_ml_flow/model_stress3.pkl
 testing_ml_flow/scaler2.pkl
+testing_ml_flow/X_train2.npy
+testing_ml_flow/y_train2.npy
+testing_ml_flow/X_test2.npy
+testing_ml_flow/y_test2.npy
