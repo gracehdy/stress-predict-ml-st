@@ -169,3 +169,12 @@ Stress categories are defined by tertile splits of a continuous score, not clini
 ### [Medium]  SVM Trained on Subsample Only
 SVM was trained on 100K of 800K training rows due to computational cost. Its reported performance (73.84% CV accuracy) may not reflect full-dataset behavior and cannot be fairly compared to models trained on the complete data.
 
+---
+
+## Author Contributions
+
+| Name | Contributions |
+|------|---------------|
+| Grace Heidy Christania | Backend, frontend, demo video, PPT final report, ML model, user testing |
+| Zahra' Zakiyyah Priyono | EDA, preprocessing, ML model, PPT final report, user testing |
+| Raynaldo Winson Amadeus Kusuma | README.md |
