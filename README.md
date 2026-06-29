@@ -10,7 +10,7 @@
 
 ## Results
 
-Below is the deployment link for the Student Stress Predictor application:
+Below is the deployment link for the Student Stress Predictor website:
 https://stress-predict-ml-st.streamlit.app/
 
 During model development, we trained several other models for model selection. As a baseline, below are the metrics for all the models we trained:
