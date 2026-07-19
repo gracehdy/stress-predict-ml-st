@@ -1,6 +1,6 @@
 # Student Stress Predictor
 
-> Student Stress Predictor is an AI-powered platform that analyzes academic performance and lifestyle habits to predict student stress levels and deliver instant mental health insights.
+> StressPredict is an advanced, AI-powered web platform meticulously engineered to address the growing concern of mental health challenges within university ecosystems. Developed as a data-driven screening tool, this application utilizes a robust LightGBM Machine Learning model to evaluate multi-dimensional student data, spanning from academic performance (GPA), institutional pressures (exam loads), and daily lifestyle habits to accurately predict whether a student falls into a Low, Moderate, or High stress category. The system goes beyond simple classification by pinpointing the exact dominant root causes that trigger student distress. By seamlessly integrating an automated questionnaire with real-time analytics and instant psychological action items via the Groq AI Infrastructure. It provides students with immediate, self-reflective insights to prevent severe burnout and promote a healthier campus lifestyle.
 
 ## Key Features
 * **AI Stress Predictor:** Instantly classifies student stress levels into Low, Moderate, or High categories, complete with a model confidence score.
