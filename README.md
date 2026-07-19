@@ -1,17 +1,34 @@
 # Student Stress Predictor
 
-> Predicts stress level category (High / Medium / Low) for students based on lifestyle, academic, and mental health indicators.
+> Student Stress Predictor is an AI-powered platform that analyzes academic performance and lifestyle habits to predict student stress levels and deliver instant mental health insights.
+
+## Key Features
+* **AI Stress Predictor:** Instantly classifies student stress levels into Low, Moderate, or High categories, complete with a model confidence score.
+* **Top Trigger Identification:** Automatically pinpoints the primary root factors behind students' stress.
+* **AI Counselor Recommendations:** Delivers personalized, actionable preventive steps and psychological advice to help manage your well-being.
+* **Easy Re-assessment:** Features a quick-reset button allowing students to easily re-run the analysis with updated metrics.
+
+## Technologies Used
+* **Programming Language:** Python 3.12+
+* **Data Science & ML Frameworks:** Pandas, Scikit-Learn, LightGBM
+* **Deployment & Interface:** Streamlit, Docker
+* **LLM & Infrastructure:** Groq AI Infrastructure
 
 **Task:** Classification
-
-**Framework:** Pandas, SKLearn, LightGBM, Streamlit
 
 ---
 
 ## Results
 
-Below is the deployment link for the Student Stress Predictor website:
-https://stress-predict-ml-st.streamlit.app/
+## Web App User Guide
+To analyze your stress level using the live website, follow these simple steps:
+1. **Access the Web App:** Open the deployment link: https://stress-predict-ml-st.streamlit.app/
+2. **Fill Out the Questionnaire:** Navigate to the **Prediksi** page and enter your basic information, academic, lifestyle, and mental well-being metrics.
+3. **Get Your Results:** Click the prediction button to open the **Hasil** page, which instantly displays:
+   * **Stress Level:** The model's classification (Low, Moderate, or High) along with the model's confidence score.
+   * **Top Triggers:** Identification of the primary factors contributing to students' stress.
+   * **AI Counselor Recommendations:** Actionable, personalized preventive steps and advice to help manage students' stress.
+4. **Retry Anytime:** If you want to take the test again, simply click the **"Isi Ulang Kuesioner"** button at the bottom of the page.
 
 During model development, we trained several other models for model selection. As a baseline, below are the metrics for all the models we trained:
 
