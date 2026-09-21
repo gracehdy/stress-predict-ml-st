@@ -39,7 +39,7 @@ def get_ai_recommendation(status, faktor_dominan):
         
         chat = client.chat.completions.create(
             messages=[{"role": "user", "content": prompt}],
-            model="llama-3.1-8b-instant",
+            model="llama-3.3-70b-versatile",
             temperature=0.6
         )
         return chat.choices[0].message.content
