@@ -43,9 +43,9 @@ def get_ai_recommendation(status, faktor_dominan):
             temperature=0.6
         )
         return chat.choices[0].message.content
-    except:
+    except Exception as e:
+        st.error(f"Error Detail dari Groq/Python: {type(e).__name__} - {str(e)}")
         return "• Terapkan teknik pernapasan dalam untuk menenangkan sistem saraf.\n• Lakukan aktivitas fisik ringan untuk meningkatkan suasana hati.\n• Ganti pikiran negatif dengan kalimat positif untuk mengurangi kecemasan."
-
 st.markdown("""
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
     
