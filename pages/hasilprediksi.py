@@ -39,7 +39,7 @@ def get_ai_recommendation(status, faktor_dominan):
         
         chat = client.chat.completions.create(
             messages=[{"role": "user", "content": prompt}],
-            model="llama3-8b-8192",
+            model="openai/gpt-oss-120b",
             temperature=0.6
         )
         return chat.choices[0].message.content
