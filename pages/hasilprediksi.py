@@ -26,8 +26,8 @@ def get_ai_recommendation(status, faktor_dominan):
         else:
             api_key = os.environ.get("GROQ_API_KEY")
         if not api_key:
-            st.error("API Key Groq tidak ditemukan! Pastikan sudah dikonfigurasi di Streamlit Secrets.")
-            raise ValueError("GROQ_API_KEY is missing")
+            st.error("Error: GROQ_API_KEY tidak ditemukan di st.secrets maupun os.environ!")
+            return "• Konfigurasi API key belum terpasang dengan benar di Streamlit Cloud."
         client = Groq(api_key=api_key)
         prompt = f"""Berikan 3 saran psikologis untuk mahasiswa dengan status stres: '{status}', dipicu oleh: {', '.join(faktor_dominan)}. 
         Aturan wajib: 
