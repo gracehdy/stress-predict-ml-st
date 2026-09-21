@@ -20,7 +20,10 @@ model, scaler = load_ml()
 
 def get_ai_recommendation(status, faktor_dominan):
     try:
-        client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+        api_key = st.secrets.get("GROQ_API_KEY") or os.environ.get("GROQ_API_KEY")
+        if not api_key:
+            return "• Konfigurasi API Key tidak ditemukan.\n• Harap periksa Streamlit Secrets kamu.\n• Hubungi administrator sistem."
+        client = Groq(api_key=api_key)
         prompt = f"""Berikan 3 saran psikologis untuk mahasiswa dengan status stres: '{status}', dipicu oleh: {', '.join(faktor_dominan)}. 
         Aturan wajib: 
         1. Hanya berikan 3 poin.
