@@ -21,7 +21,6 @@ model, scaler = load_ml()
 def get_ai_recommendation(status, faktor_dominan):
     try:
         client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
-        # Mengubah prompt agar AI memberikan format yang Anda mau
         prompt = f"""Berikan 3 saran psikologis untuk mahasiswa dengan status stres: '{status}', dipicu oleh: {', '.join(faktor_dominan)}. 
         Aturan wajib: 
         1. Hanya berikan 3 poin.
