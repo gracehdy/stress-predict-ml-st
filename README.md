@@ -37,8 +37,8 @@ During model development, we trained several other models for model selection. A
 | Logistic Regression |0.7559 ± 0.0017 | 0.7566 ± 0.0017 | 11.9s |
 | Random Forest | 0.7470 ± 0.0012 | 0.7491 ± 0.0012 | ~224s |
 | SVM (with 100k subsample) | 0.7384 ± 0.0025 | 0.7256 ± 0.0032 | 4.0s |
-| LightGBM | 0.7560 ± 0.0013 | 0.7578 ± 0.0013 | ~347.3s |
-| XGBoost (best) | 0.7559 ± 0.0015 | 0.7578 ± 0.0015| 175.1s |
+| LightGBM (best) | 0.7560 ± 0.0013 | 0.7578 ± 0.0013 | ~347.3s |
+| XGBoost  | 0.7559 ± 0.0015 | 0.7578 ± 0.0015| 175.1s |
 
 The LightGBM model we chose has the following performance in the test set.
 
